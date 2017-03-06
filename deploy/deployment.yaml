@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    application: pgview-web
+    version: v0.0.1
+  name: pgview-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: pgview-web
+  template:
+    metadata:
+      labels:
+        application: pgview-web
+        version: v0.0.1
+    spec:
+      containers:
+      - name: service
+        image: registry.opensource.zalan.do/stups/pgview-web
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi

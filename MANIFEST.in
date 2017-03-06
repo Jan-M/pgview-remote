@@ -1,0 +1,3 @@
+recursive-include pgview_web/static *
+recursive-include pgview_web/templates *
+include *.rst
