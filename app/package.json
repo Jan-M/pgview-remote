@@ -1,10 +1,10 @@
 {
   "name": "kube-ops-view",
   "version": "1.0.0",
-  "description": "=========================== Kubernetes Operational View ===========================",
+  "description": "=========================== PGView Web ===========================",
   "main": "src/app.js",
   "config": {
-    "buildDir": "../kube_ops_view/static/build"
+    "buildDir": "../pgview_web/static/build"
   },
   "scripts": {
     "prestart": "npm install",

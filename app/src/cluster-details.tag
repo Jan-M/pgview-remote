@@ -1,0 +1,2 @@
+<cluster-details>
+</cluster-details>

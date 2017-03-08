@@ -67,7 +67,7 @@ def health():
 @app.route('/js/<path:path>')
 @authorize
 def send_js(path):
-    return send_from_directory('js', path)
+    return send_from_directory('static/build', path)
 
 @app.route('/')
 @authorize
@@ -155,11 +155,12 @@ class CommaSeparatedValues(click.ParamType):
               help='Print the current version number and exit.')
 @click.option('-p', '--port', type=int, help='HTTP port to listen on (default: 8081)', envvar='SERVER_PORT', default=8081)
 @click.option('-m', '--mock', is_flag=True, help='Mock Kubernetes Clusters', envvar='MOCK')
+@click.option('-d', '--debug', is_flag=True, help='Verbose logging')
 @click.option('--secret-key', help='Secret key for session cookies', envvar='SECRET_KEY', default='development')
 @click.option('--kubeconfig-path', type=click.Path(exists=True), help='Path to kubeconfig file', envvar='KUBECONFIG_PATH')
 @click.option('--kubeconfig-contexts', type=CommaSeparatedValues(),
               help='List of kubeconfig contexts to use (default: use all defined contexts)', envvar='KUBECONFIG_CONTEXTS')
-def main(port, debug, mock, secret_key, redis_url, clusters: list, cluster_registry_url, kubeconfig_path, kubeconfig_contexts: list, query_interval):
+def main(port, mock, secret_key, debug, kubeconfig_path, kubeconfig_contexts: list):
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
 
     app.debug = debug
