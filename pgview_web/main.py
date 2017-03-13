@@ -64,10 +64,13 @@ def health():
     else:
         return 'OK'
 
+
 @app.route('/js/<path:path>')
 @authorize
 def send_js(path):
-    return send_from_directory('static/build', path)
+    return send_from_directory('static/build', path), 200, {"cache-control":"no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0",
+                                                            "Pragma":"no-cache",
+                                                            "Expires":"-1"}
 
 @app.route('/')
 @authorize
@@ -83,11 +86,11 @@ def get_list_pods():
 
 @app.route('/view/<pod>')
 @authorize
-def get_pod_data():
-    ip = 'localhost'
+def get_pod_data(pod: str):
+    host = 'localhost'
     port = 8080
-    
-    r = requests.get("{}:{}/")
+
+    r = requests.get("http://{}:{}/".format(host, port))
     return flask.Response(r.text, mimetype='application/json')
 
 

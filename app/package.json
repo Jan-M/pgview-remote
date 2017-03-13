@@ -38,7 +38,7 @@
     "brfs": "^1.4.3",
     "eslint": "^3.13.1",
     "eslint-loader": "^1.6.1",
-    "riot": "^3.0.7",
+    "riot": "^3.3.2",
     "riot-hot-reload": "0.0.2",
     "riot-tag-loader": "1.0.0",
     "rimraf": "^2.5.4",
