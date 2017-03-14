@@ -5,17 +5,31 @@ PGView Web
 Local testing
 =============
 
-Run Spilo locally for testing:
+Run Spilo locally
+-----------------
 
 .. code-block::bash
 
   docker run -p 8080:8080 registry.opensource.zalan.do/acid/spiloprivate-9.6:1.2-p1
 
-Run with mock:
+Run locally
+-----------
+
+Run Python flask backend app:
 
 .. code-block::bash
 
-  python3 -m --mock
+  python3 -m pgview_web
+
+
+Hot update of Javascript/riot
+-----------------------------
+
+In app folder run:
+
+.. code-block:: bash
+
+  npm start
 
 License
 =======
@@ -32,8 +46,3 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
-
-.. _Kubernetes Dashboard: https://github.com/kubernetes/dashboard
-.. _ECMAScript 6 Compatibility Table: https://kangax.github.io/compat-table/es6/
-.. _ping try_except_ on Twitter: https://twitter.com/try_except_
-.. _issues labeled with "help wanted": https://github.com/hjacobs/kube-ops-view/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22

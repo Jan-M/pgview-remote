@@ -1,7 +1,9 @@
 <pgview-web>
-    <h1>PGView - Web</h1>
-    <cluster-list>
-    </cluster-list>
-    <cluster-details>
-    </cluster-details>
+    <cluster-list></cluster-list>
+    <cluster-details></cluster-details>    
+    <script>
+
+    this.on('route', () => { console.log("route changed")})
+
+    </script>
 </pgview-web>

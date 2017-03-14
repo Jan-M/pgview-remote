@@ -64,6 +64,12 @@ def health():
     else:
         return 'OK'
 
+@app.route('/css/<path:path>')
+@authorize
+def send_css(path):
+    return send_from_directory('static/', path), 200, {"cache-control":"no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0",
+                                                       "Pragma":"no-cache",
+                                                       "Expires":"-1"}
 
 @app.route('/js/<path:path>')
 @authorize
