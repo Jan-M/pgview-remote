@@ -7,11 +7,11 @@ import './pgview-web.tag'
 import './member-list.tag'
 
 /* eslint-disable no-console */
-route('/view', () => { console.log('view')})
+// route('/view', () => { console.log('view')})
 
 /* eslint-disable no-console */
-route('/cluster/*/*', (a,b) => { console.log('cluster', a, b)})
+// route('/clusters/*/*', (a,b) => { console.log('cluster', a, b)})
 
-route.start()
+// route.start(true)
 
 riot.mount('pgview-web', {})
