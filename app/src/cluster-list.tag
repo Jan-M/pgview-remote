@@ -1,30 +1,53 @@
-<cluster-list>
+<cluster-list>  
+  <virtual if={ !this.cluster }>
   <div>
-    <h1>Cluster Members</h1>
+    <h1>Cluster Selection</h1>
   </div>
-  <div id="members-list">
-  <div each={ members } onclick={ goto }>
-    <div>
-      <div>{ host }</div>
-      <div class="list-role">Role: { role }</div>
-      <div class="list-load">Load1: { load1 }</div>
-    </div>
+  <div each={ opts.clusters }>
+    <a href="#/clusters/{id}">{id}: {name}</a>
   </div>
+  </virtual>
+
+  <div if={ this.cluster && !this.pod }>
+    <h1><a href="#/clusters">Home</a> - Cluster { this.cluster }</h1>
+    <member-list cluster={ this.cluster } members={ this.members }></member-list>
   </div>
+
+  <virtual if={ this.cluster && this.pod }>
+    <h1><a href="#/clusters">Home</a> - <a href="#/clusters/{ this.cluster }">Cluster { this.cluster}</a> - Pod { this.pod }</h1>
+    <cluster-details cluster={ this.cluster } pod={ this.pod }></cluster-details>
+  </virtual>
+
   <script>
 
-  route('/clusters/*', () => {console.log('cluster navigation')})
-
-  route.start()
-
-  this.goto = () => {
-    console.log("trigger goto")
-    route('/clusters/a')
+  updateMembers = () => {
+      jQuery.get("/clusters/"+this.cluster,{}, (data) => {
+              this.update( {members: data[this.cluster]} )
+          }
+      )
   }
 
-  this.members = [{host: "host1", role: "master", load1: 15 },
-                  {host: "host2", role: "slave", load1: 3 },
-                  {host: "host3", role: "slave", load1: 2 }]
+  route('/clusters', () => {
+    this.cluster = null;
+    this.pod = null;
+
+    this.update()
+  })
+
+  route('/clusters/*', (id) => { 
+    this.cluster = id
+    this.pod = null
+    updateMembers()
+  } )
+
+  route('/clusters/*/*', (cluster, pod) => {
+    this.cluster = cluster
+    this.pod = pod
+
+    this.update()
+  })
+
+  route.start(true)
 
   </script>
 </cluster-list>

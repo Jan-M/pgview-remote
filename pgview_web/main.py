@@ -84,15 +84,30 @@ def index():
     return flask.render_template('index.html')
 
 
-@app.route('/list')
+@app.route('/clusters')
 @authorize
-def get_list_pods():    
-    return flask.Response("[]", mimetype='application/json')
+def get_list_clusters():
+    l = []
+    l.append({"id":"cluster1", "name":" Cluster 1"})
+    l.append({"id":"cluster2", "name":" Cluster 2"})
+    l.append({"id":"cluster3", "name":" Cluster 3"})
+    l.append({"id":"cluster4", "name":" Cluster 4"})
+    
+    clusters = json.dumps(l)
+    return flask.Response(clusters, mimetype='application/json')
 
+@app.route('/clusters/<cluster>')
+def get_list_members(cluster: str):
+    members = {}
+    members["cluster1"] = ["pod1", "pod2", "pod3"]
+    members["cluster2"] = ["c2-pod1", "c2-pod2", "c3-pod3"]
+    members["cluster3"] = ["c3-pod-1", "c3-pod-2", "c3-pod-3"]
+    members["cluster4"] = ["c4-pod1", "c4-pod2", "c4-pod3"]
+    return flask.Response(json.dumps(members), mimetype="application/json")
 
-@app.route('/view/<pod>')
+@app.route('/clusters/<cluster>/pod/<pod>')
 @authorize
-def get_pod_data(pod: str):
+def get_pod_data(cluster: str, pod: str):
     host = 'localhost'
     port = 8080
 

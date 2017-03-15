@@ -1,8 +1,5 @@
 <cluster-details>
-<div>
-    <h2>Host: { this.data.hostname }</h2>
-    <h3>Cores: { this.data.cpu_cores }</h3>
-
+<div if={ this.data }>
     <div id="block-partitions">
         <h3>Partitions</h3>
         <div id="partitions">
@@ -71,20 +68,23 @@
 </div>
 <script type="javascript">
 
-    this.on('route', () => { console.log("route changed")})
-
     this.tick = () => {
-        jQuery.get("/view/default-pod",{}, (data) => { 
+        if(!this.opts.pod) return;
+
+        jQuery.get("/clusters/" + this.opts.cluster + "/pod/" + this.opts.pod,{}, (data) => { 
                 this.update( {data: data} )
             }
         )
     }
 
     var timer = setInterval(this.tick, 5000)
+    this.tick()
 
     this.on('update', (data) => {        
-//        console.log(data)
+
     })
+
+    this.on('unmount', () => { console.log('unmount details')})
 
 </script>
 </cluster-details>

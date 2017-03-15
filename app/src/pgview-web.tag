@@ -1,9 +1,10 @@
 <pgview-web>
-    <cluster-list></cluster-list>
-    <cluster-details></cluster-details>    
+    <cluster-list clusters={ this.clusters }></cluster-list>    
     <script>
-
-    this.on('route', () => { console.log("route changed")})
-
+        jQuery.get("/clusters",{}, (data) => { 
+                this.update( {clusters: data} )
+                console.log(data)
+            }
+        )
     </script>
 </pgview-web>

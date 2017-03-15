@@ -4,6 +4,7 @@ import 'riot-hot-reload'
 import './cluster-list.tag'
 import './cluster-details.tag'
 import './pgview-web.tag'
+import './member-list.tag'
 
 /* eslint-disable no-console */
 route('/view', () => { console.log('view')})
