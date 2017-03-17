@@ -16,7 +16,11 @@ def request(cluster, path, **kwargs):
         # sane default timeout
         kwargs['timeout'] = (5, 15)
     if cluster.cert_file and cluster.key_file:
+        logger.info("Using kube cert file")
         kwargs['cert'] = (cluster.cert_file, cluster.key_file)
+
+    logger.info("token: {}".format(cluster.auth.authorization[:15]))
+
     return session.get(urljoin(cluster.api_server_url, path), auth=cluster.auth, verify=cluster.ssl_ca_cert, **kwargs)
 
 

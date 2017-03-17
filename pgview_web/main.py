@@ -105,7 +105,7 @@ def get_list_members(cluster: str):
 @app.route('/clusters/<cluster>/pod/<pod>')
 @authorize
 def get_pod_data(cluster: str, pod: str):
-
+    logger.info("Getting pod data for: {}".format(pod))
     pod_data = read_pod(get_cluster(), "default", pod)
     logger.info(pod_data)
 
@@ -204,7 +204,7 @@ def main(port, mock, secret_key, debug, clusters: list, kubeconfig_path, kubecon
 
     discoverer = StaticClusterDiscoverer([])
     logger.info(discoverer.get_clusters()[0])
-    
+
     set_cluster(discoverer.get_clusters()[0])
 
     app.debug = debug

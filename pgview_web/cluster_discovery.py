@@ -75,6 +75,7 @@ class StaticClusterDiscoverer:
                 # => assume default kubectl proxy URL
                 cluster = Cluster(generate_cluster_id(DEFAULT_CLUSTERS), DEFAULT_CLUSTERS)
             else:
+                logger.info("in cluster configuration failed")
                 config = kubernetes.client.configuration
                 cluster = Cluster(
                     generate_cluster_id(config.host),
@@ -84,7 +85,7 @@ class StaticClusterDiscoverer:
             self._clusters.append(cluster)
         else:
             for api_server_url in api_server_urls:
-
+                logger.info("api server url: {}".format(api_server_url))
                 if 'localhost' not in api_server_url:
                     # TODO: hacky way of detecting whether we need a token or not
                     auth = OAuthTokenAuth('read-only')
