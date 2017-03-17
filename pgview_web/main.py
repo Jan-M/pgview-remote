@@ -94,6 +94,7 @@ def get_list_clusters():
     clusters = json.dumps(clusters)
     return flask.Response(clusters, mimetype='application/json')
 
+
 @app.route('/clusters/<cluster>')
 def get_list_members(cluster: str):
     pods = read_pods(get_cluster(), "default", cluster)
@@ -101,13 +102,12 @@ def get_list_members(cluster: str):
     pods = list(map(lambda x: x["metadata"], pods["items"]))
     return flask.Response(json.dumps(pods), mimetype="application/json")
 
+
 @app.route('/clusters/<cluster>/pod/<pod>')
 @authorize
 def get_pod_data(cluster: str, pod: str):
-    host = 'localhost'
     port = 8080
-
-    r = requests.get("http://{}:{}/".format(host, port))
+    r = requests.get("http://{}:{}/".format(pod, port))
     return flask.Response(r.text, mimetype='application/json')
 
 
