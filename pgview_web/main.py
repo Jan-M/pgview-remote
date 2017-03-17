@@ -15,14 +15,16 @@ import os
 import signal
 import time
 import requests
-from pathlib import Path
 
+from .spiloutils import read_pods, read_statefulsets
+
+from pathlib import Path
 from flask import Flask, redirect, send_from_directory
 from flask_oauthlib.client import OAuth
 from .oauth import OAuthRemoteAppWithRefresh
 from urllib.parse import urljoin
 
-from .kubernetes import query_kubernetes_cluster
+
 from .cluster_discovery import DEFAULT_CLUSTERS, StaticClusterDiscoverer, KubeconfigDiscoverer
 
 
@@ -87,23 +89,17 @@ def index():
 @app.route('/clusters')
 @authorize
 def get_list_clusters():
-    l = []
-    l.append({"id":"cluster1", "name":" Cluster 1"})
-    l.append({"id":"cluster2", "name":" Cluster 2"})
-    l.append({"id":"cluster3", "name":" Cluster 3"})
-    l.append({"id":"cluster4", "name":" Cluster 4"})
-    
-    clusters = json.dumps(l)
+    stateful_sets = read_statefulsets(get_cluster(), "default")
+    clusters = (list(map(lambda x: x["metadata"], stateful_sets["items"])))
+    clusters = json.dumps(clusters)
     return flask.Response(clusters, mimetype='application/json')
 
 @app.route('/clusters/<cluster>')
 def get_list_members(cluster: str):
-    members = {}
-    members["cluster1"] = ["pod1", "pod2", "pod3"]
-    members["cluster2"] = ["c2-pod1", "c2-pod2", "c3-pod3"]
-    members["cluster3"] = ["c3-pod-1", "c3-pod-2", "c3-pod-3"]
-    members["cluster4"] = ["c4-pod1", "c4-pod2", "c4-pod3"]
-    return flask.Response(json.dumps(members), mimetype="application/json")
+    pods = read_pods(get_cluster(), "default", cluster)
+    logger.info(pods)
+    pods = list(map(lambda x: x["metadata"], pods["items"]))
+    return flask.Response(json.dumps(pods), mimetype="application/json")
 
 @app.route('/clusters/<cluster>/pod/<pod>')
 @authorize
@@ -173,6 +169,15 @@ class CommaSeparatedValues(click.ParamType):
             values = value
         return values
 
+CLUSTER = None
+def get_cluster():
+    return CLUSTER
+
+def set_cluster(c):
+    global CLUSTER
+    CLUSTER = c
+    return CLUSTER
+
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('-V', '--version', is_flag=True, callback=print_version, expose_value=False, is_eager=True,
@@ -181,11 +186,21 @@ class CommaSeparatedValues(click.ParamType):
 @click.option('-m', '--mock', is_flag=True, help='Mock Kubernetes Clusters', envvar='MOCK')
 @click.option('-d', '--debug', is_flag=True, help='Verbose logging')
 @click.option('--secret-key', help='Secret key for session cookies', envvar='SECRET_KEY', default='development')
+@click.option('--clusters', type=CommaSeparatedValues(),
+              help='Comma separated list of Kubernetes API server URLs (default: {})'.format(DEFAULT_CLUSTERS), envvar='CLUSTERS')
 @click.option('--kubeconfig-path', type=click.Path(exists=True), help='Path to kubeconfig file', envvar='KUBECONFIG_PATH')
 @click.option('--kubeconfig-contexts', type=CommaSeparatedValues(),
               help='List of kubeconfig contexts to use (default: use all defined contexts)', envvar='KUBECONFIG_CONTEXTS')
-def main(port, mock, secret_key, debug, kubeconfig_path, kubeconfig_contexts: list):
+def main(port, mock, secret_key, debug, clusters: list, kubeconfig_path, kubeconfig_contexts: list):
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
+
+    if kubeconfig_path:
+        discoverer = KubeconfigDiscoverer(Path(kubeconfig_path), set(kubeconfig_contexts or []))
+    else:
+        api_server_urls = clusters or []
+        discoverer = StaticClusterDiscoverer(api_server_urls)
+
+    set_cluster(discoverer.get_clusters()[0])
 
     app.debug = debug
     app.secret_key = secret_key

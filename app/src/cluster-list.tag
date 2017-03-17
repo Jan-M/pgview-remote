@@ -4,7 +4,7 @@
     <h1>Cluster Selection</h1>
   </div>
   <div each={ opts.clusters }>
-    <a href="#/clusters/{id}">{id}: {name}</a>
+    <a href="#/clusters/{name}">{namespace}.{name}</a>
   </div>
   </virtual>
 
@@ -14,7 +14,7 @@
   </div>
 
   <virtual if={ this.cluster && this.pod }>
-    <h1><a href="#/clusters">Home</a> - <a href="#/clusters/{ this.cluster }">Cluster { this.cluster}</a> - Pod { this.pod }</h1>
+    <h1><a href="#/clusters">Home</a> - <a href="#/clusters/{ this.cluster }">Cluster { this.cluster }</a> - Pod { this.pod }</h1>
     <cluster-details cluster={ this.cluster } pod={ this.pod }></cluster-details>
   </virtual>
 
@@ -22,7 +22,7 @@
 
   updateMembers = () => {
       jQuery.get("/clusters/"+this.cluster,{}, (data) => {
-              this.update( {members: data[this.cluster]} )
+              this.update( {members: data} )
           }
       )
   }
