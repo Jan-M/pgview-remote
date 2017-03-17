@@ -15,10 +15,10 @@ COPY scm-source.json /
 COPY requirements.txt /
 RUN pip3 install -r /requirements.txt
 
-COPY pgview-web /pgview-web
+COPY pgview_web /pgview_web
 
 ARG VERSION=dev
-RUN sed -i "s/__version__ = .*/__version__ = '${VERSION}'/" /pgview-web/__init__.py
+RUN sed -i "s/__version__ = .*/__version__ = '${VERSION}'/" /pgview_web/__init__.py
 
 WORKDIR /
-ENTRYPOINT ["/usr/bin/python3", "-m", "pgview-web"]
+ENTRYPOINT ["/usr/bin/python3", "-m", "pgview_web"]
