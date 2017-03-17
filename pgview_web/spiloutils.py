@@ -23,13 +23,19 @@ def request(cluster, path, **kwargs):
 def read_pods(cluster, namespace, spilo_cluster):
     r = request(cluster, "/api/v1/namespaces/{}/pods?labelSelector=spilo-cluster%3D{}".format(namespace, spilo_cluster))
     if r.status_code != 200:
-        return False
+        r.raise_for_status()
+    return r.json()
+
+def read_pod(cluster, namespace, pod):
+    r = request(cluster, "/api/v1/namespaces/{}/pods/{}?labelSelector=application%3Dspilo".format(namespace, pod))
+    if r.status_code != 200:
+        r.raise_for_status()
     return r.json()
 
 def read_statefulsets(cluster, namespace):
     r = request(cluster, "/apis/apps/v1beta1/namespaces/{}/statefulsets?labelSelector=application%3Dspilo".format(namespace))
     if r.status_code != 200:
-        return False
+        r.raise_for_status()
     return r.json()
 
 def parse_time(s: str):

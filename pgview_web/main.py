@@ -16,7 +16,7 @@ import signal
 import time
 import requests
 
-from .spiloutils import read_pods, read_statefulsets
+from .spiloutils import read_pod, read_pods, read_statefulsets
 
 from pathlib import Path
 from flask import Flask, redirect, send_from_directory
@@ -24,9 +24,7 @@ from flask_oauthlib.client import OAuth
 from .oauth import OAuthRemoteAppWithRefresh
 from urllib.parse import urljoin
 
-
 from .cluster_discovery import DEFAULT_CLUSTERS, StaticClusterDiscoverer, KubeconfigDiscoverer
-
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +88,7 @@ def index():
 @authorize
 def get_list_clusters():
     stateful_sets = read_statefulsets(get_cluster(), "default")
+    logger.info(stateful_sets)
     clusters = (list(map(lambda x: x["metadata"], stateful_sets["items"])))
     clusters = json.dumps(clusters)
     return flask.Response(clusters, mimetype='application/json')
@@ -106,8 +105,17 @@ def get_list_members(cluster: str):
 @app.route('/clusters/<cluster>/pod/<pod>')
 @authorize
 def get_pod_data(cluster: str, pod: str):
+
+    pod_data = read_pod(get_cluster(), "default", pod)
+    logger.info(pod_data)
+
+    podIP = pod_data.get("status",{}).get("podIP", None)
+
+    if not podIP:
+        return "", 500
+
     port = 8080
-    r = requests.get("http://{}:{}/".format(pod, port))
+    r = requests.get("http://{}:{}/".format(podIP, port))
     return flask.Response(r.text, mimetype='application/json')
 
 
@@ -194,12 +202,9 @@ def set_cluster(c):
 def main(port, mock, secret_key, debug, clusters: list, kubeconfig_path, kubeconfig_contexts: list):
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
 
-    if kubeconfig_path:
-        discoverer = KubeconfigDiscoverer(Path(kubeconfig_path), set(kubeconfig_contexts or []))
-    else:
-        api_server_urls = clusters or []
-        discoverer = StaticClusterDiscoverer(api_server_urls)
-
+    discoverer = StaticClusterDiscoverer([])
+    logger.info(discoverer.get_clusters()[0])
+    
     set_cluster(discoverer.get_clusters()[0])
 
     app.debug = debug
