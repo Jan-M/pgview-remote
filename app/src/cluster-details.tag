@@ -1,7 +1,7 @@
 <cluster-details>
 <div if={ this.data }>
     <div id="block-cpu">
-        <h3>Memory</h3>
+        <h3>CPU</h3>
         <div id="cpu">
             <table class="table">
                 <thead>
@@ -10,8 +10,8 @@
                         <th>System %</th>
                         <th>User %</th>
                         <th>IOWait</th>
-                        <td>Load 1</th>
-                        <td>Load 5</th>
+                        <th>Load 1</th>
+                        <th>Load 5</th>
                         <th>Load 15</th>
                     </tr>
                 </thead>
@@ -37,8 +37,8 @@
                         <th>Free</th>
                         <th>Buffers</th>
                         <th>Cached</th>
-                        <td>Commit Limit</th>
-                        <td>Commitd As</th>
+                        <th>Commit Limit</th>
+                        <th>Commitd As</th>
                         <th>Dirty</th>
                     </tr>
                 </thead>
