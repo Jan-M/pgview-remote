@@ -95,6 +95,7 @@ def get_list_clusters():
 
 
 @app.route('/clusters/<cluster>')
+@authorize
 def get_list_members(cluster: str):
     pods = read_pods(get_cluster(), "default", cluster)
     logger.info(pods)
