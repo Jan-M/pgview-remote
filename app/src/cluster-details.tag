@@ -48,7 +48,7 @@
                     <td>{ this.data.system_stats.memory.buffers }</td>
                     <td>{ this.data.system_stats.memory.cached }</td>
                     <td>{ this.data.system_stats.memory.commit_limit }</td>
-                    <td>{ this.data.system_stats.memory.commited_as }</td>
+                    <td>{ this.data.system_stats.memory.committed_as }</td>
                     <td>{ this.data.system_stats.memory.dirty }</td>
                 </tr>
             </table>
@@ -84,7 +84,7 @@
         </div>
     </div>
     <div id="block-current-processes">
-        <h2>Processes</h2>
+        <h2>Processes { this.data.postgresql.connections.active } / { this.data.postgresql.connections.total } of maximum { this.data.postgresql.connections.max }</h2>
         <div id="current-processes">
             <table class="table table-striped">
                 <thead>
