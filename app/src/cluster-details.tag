@@ -86,19 +86,19 @@
     <div id="block-current-processes">
         <h2>Processes { this.data.postgresql.connections.active } / { this.data.postgresql.connections.total } of maximum { this.data.postgresql.connections.max }</h2>
         <div id="current-processes">
-            <table class="table table-striped">
+            <table class="table table-striped process-table">
                 <thead>
                     <tr>
-                        <th>PID</th>
-                        <th>Lock</th>
-                        <th>Type</th>
-                        <th>utime</th>
-                        <th>stime</th>
-                        <th>read</th>
-                        <th>write</th>
-                        <th>age</th>
-                        <th>DB</th>
-                        <th>User</th>
+                        <th style="width:65px;">PID</th>
+                        <th style="width:65px;">Lock</th>
+                        <th style="width:200px;">Type</th>
+                        <th style="width:60px;">utime</th>
+                        <th style="width:60px;">stime</th>
+                        <th style="width:60px;">read</th>
+                        <th style="width:60px;">write</th>
+                        <th style="width:60px;">age</th>
+                        <th style="width:180px;">DB</th>
+                        <th style="width:180px;">User</th>
                         <th>Query</th>
                     </tr>
                 </thead>
@@ -120,6 +120,9 @@
         </div>
     </div>
 </div>
+<style>
+  .process-table { font-size: 12px }
+</style>
 <script type="javascript">
 
     this.tick = () => {
