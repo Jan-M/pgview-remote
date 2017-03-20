@@ -38,7 +38,7 @@
                         <th>Buffers</th>
                         <th>Cached</th>
                         <th>Commit Limit</th>
-                        <th>Commitd As</th>
+                        <th>Commited As</th>
                         <th>Dirty</th>
                     </tr>
                 </thead>
