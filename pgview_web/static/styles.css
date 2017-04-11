@@ -1,13 +1,5 @@
-.pgview-view {
-    display: flex;
-    flex: 1;
-}
-
-.container,
-.element {
-	padding: 10px;
-    background: lightgrey;
-    border: 0px solid black;
+body {
+    padding-top: 60px;
 }
 
 h1 {
@@ -19,43 +11,8 @@ h1, h2, h3 {
     font-family: 'Open Sans', sans-serif;
 }
 
-.container {
-    width: 100%;
-    height: 100%;
-}
-
 .font-robot {
     font-family: 'Roboto 300', sans-serif;
-}
-
-.flex {
-    display: flex;
-    box-sizing: flex;
-}
-
-.row {
-    flex-flow: row wrap;
-}
-
-.col {
-    flex-flow: column wrap;
-}
-
-.element {
-    min-width: 100px;
-}
-
-.element div {
-    background: white;
-}
-
-.content {
-    flex: 1 100%;
-    padding: 10px;
-}
-
-.structure {
-    min-height: 240px;
 }
 
 #members-list > div {

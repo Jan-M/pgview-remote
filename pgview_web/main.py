@@ -15,8 +15,9 @@ import os
 import signal
 import time
 import requests
+import tokens
 
-from .spiloutils import read_pod, read_pods, read_statefulsets
+from .spiloutils import read_pod, read_pods, read_statefulsets, read_thirdpartyobjects
 
 from pathlib import Path
 from flask import Flask, redirect, send_from_directory
@@ -29,8 +30,16 @@ from .cluster_discovery import DEFAULT_CLUSTERS, StaticClusterDiscoverer, Kubeco
 logger = logging.getLogger(__name__)
 
 SERVER_STATUS = {'shutdown': False}
+
 AUTHORIZE_URL = os.getenv('AUTHORIZE_URL')
+TOKENINFO_URL = os.getenv('OAUTH2_TOKEN_INFO_URL')
+TEAM_SERVICE_URL = os.getenv('TEAM_SERVICE_URL')
+
 APP_URL = os.getenv('APP_URL')
+
+tokens.configure()
+tokens.manage('read-only')
+tokens.start()
 
 app = Flask(__name__)
 
@@ -45,6 +54,31 @@ auth = OAuthRemoteAppWithRefresh(
     authorize_url=AUTHORIZE_URL
 )
 oauth.remote_apps['auth'] = auth
+
+
+def verify_token(token):
+    if not token:
+        return False
+
+    r = requests.get(TOKENINFO_URL, headers={'Authorization': token})
+
+    if r.status_code == 200:
+        return True
+
+    return False
+
+def authorize_api(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if not 'Authorization' in hasattr(flask.request.headers):
+            return {}, 401
+
+        if not verify_token(flask.request.headers.get('Authorization')):
+            return {}, 401
+
+        return f(*args, **kwargs)
+
+    return wrapper
 
 
 def authorize(f):
@@ -64,6 +98,12 @@ def health():
     else:
         return 'OK'
 
+
+@app.route('/favicon.png')
+def favicon():
+    return send_from_directory('static/', 'favicon-96x96.png'), 200
+
+
 @app.route('/css/<path:path>')
 @authorize
 def send_css(path):
@@ -78,28 +118,80 @@ def send_js(path):
                                                             "Pragma":"no-cache",
                                                             "Expires":"-1"}
 
+
+def get_teams_for_user(user_name):
+    if not TEAM_SERVICE_URL:
+        return json.loads(os.getenv("TEAMS", "[]"))
+
+    r = requests.get(TEAM_SERVICE_URL.format(), headers={'Authorization': 'Bearer ' + tokens.get('read-only')})
+    teams = r.json()
+    teams = list(map(lambda x: x['id_name'], teams)
+    )
+    return teams
+
+@app.route('/teams')
+@authorize
+def get_teams():
+    teams = get_teams_for_user(flask.session['user_name'])
+    return flask.Response(json.dumps(teams), mimetype="application/json"), 200
+
+
+@app.route('/config')
+@authorize
+def get_config():
+    user_name = flask.session.get("user_name", "NO_USER")
+    teams = get_teams_for_user(user_name)    
+    return flask.Response(json.dumps({"user_name": user_name, "teams": teams}), mimetype="application/json"), 200
+
+
 @app.route('/')
 @authorize
 def index():
     return flask.render_template('index.html')
 
 
+def map_statefulset(cluster):
+    return {
+        "name": cluster["metadata"]["name"],
+        "nodes": cluster["spec"]["replicas"],
+        "team": ""
+    }
+
+def map_postgresql(cluster):
+    return {
+        "team": cluster["spec"]["teamId"],
+        "name": cluster["metadata"]["name"],
+        "nodes": cluster["spec"]["numberOfInstances"]
+    }
+
 @app.route('/clusters')
 @authorize
 def get_list_clusters():
-    stateful_sets = read_statefulsets(get_cluster(), "default")
-    logger.info(stateful_sets)
-    clusters = (list(map(lambda x: x["metadata"], stateful_sets["items"])))
-    clusters = json.dumps(clusters)
+
+    postgresqls = (list(map(map_postgresql, read_thirdpartyobjects(get_cluster(), "default")["items"])))
+    statefulsets = (list(map(map_statefulset, read_statefulsets(get_cluster(), "default")["items"])))
+
+    postgresql_names = list(map(lambda x: x["name"], postgresqls))
+
+    clusters = json.dumps(postgresqls + list(filter(lambda x: x["name"] not in postgresql_names, statefulsets)))
+
     return flask.Response(clusters, mimetype='application/json')
 
+
+def map_member(member):
+    return {
+        "name": member["metadata"]["name"],
+        "labels": { "spilo-role": member["metadata"]["labels"].get("spilo-role","") },
+        "creationTimestamp": member["metadata"]["creationTimestamp"],
+        "status": member["status"],
+        "nodeName": member["spec"]["nodeName"]
+    }
 
 @app.route('/clusters/<cluster>')
 @authorize
 def get_list_members(cluster: str):
     pods = read_pods(get_cluster(), "default", cluster)
-    logger.info(pods)
-    pods = list(map(lambda x: x["metadata"], pods["items"]))
+    pods = list(map(map_member, pods["items"]))
     return flask.Response(json.dumps(pods), mimetype="application/json")
 
 
@@ -108,7 +200,6 @@ def get_list_members(cluster: str):
 def get_pod_data(cluster: str, pod: str):
     logger.info("Getting pod data for: {}".format(pod))
     pod_data = read_pod(get_cluster(), "default", pod)
-    logger.info(pod_data)
 
     podIP = pod_data.get("status",{}).get("podIP", None)
 
@@ -140,9 +231,17 @@ def authorized():
             flask.request.args['error'],
             flask.request.args['error_description']
         )
+
     if not isinstance(resp, dict):
         return 'Invalid auth response'
+
     flask.session['auth_token'] = (resp['access_token'], '')
+
+    r = requests.get(TOKENINFO_URL, headers={'Authorization': 'Bearer ' + flask.session['auth_token']})
+    flask.session['user_name'] = r.json().get('uid')
+
+    logger.info("Login from: {}".format(flask.session['user_name']))
+
     return redirect(urljoin(APP_URL, '/'))
 
 

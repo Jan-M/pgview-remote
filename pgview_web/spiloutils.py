@@ -19,8 +19,6 @@ def request(cluster, path, **kwargs):
         logger.info("Using kube cert file")
         kwargs['cert'] = (cluster.cert_file, cluster.key_file)
 
-    logger.info("token: {}".format(cluster.auth.authorization[:15]))
-
     return session.get(urljoin(cluster.api_server_url, path), auth=cluster.auth, verify=cluster.ssl_ca_cert, **kwargs)
 
 
@@ -40,6 +38,13 @@ def read_statefulsets(cluster, namespace):
     r = request(cluster, "/apis/apps/v1beta1/namespaces/{}/statefulsets?labelSelector=application%3Dspilo".format(namespace))
     if r.status_code != 200:
         r.raise_for_status()
+    return r.json()
+
+def read_thirdpartyobjects(cluster, namespace):
+    path = "/apis/acid.zalan.do/v1/namespaces/{}/postgresqls".format(namespace)
+    r = request(cluster, path)
+    if r.status_code != 200:
+        return None
     return r.json()
 
 def parse_time(s: str):
