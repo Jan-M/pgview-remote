@@ -123,7 +123,7 @@ def get_teams_for_user(user_name):
     if not TEAM_SERVICE_URL:
         return json.loads(os.getenv("TEAMS", "[]"))
 
-    r = requests.get(TEAM_SERVICE_URL.format(), headers={'Authorization': 'Bearer ' + tokens.get('read-only')})
+    r = requests.get(TEAM_SERVICE_URL.format(user_name), headers={'Authorization': 'Bearer ' + tokens.get('read-only')})
     teams = r.json()
     teams = list(map(lambda x: x['id_name'], teams)
     )
@@ -140,7 +140,7 @@ def get_teams():
 @authorize
 def get_config():
     user_name = flask.session.get("user_name", "NO_USER")
-    teams = get_teams_for_user(user_name)    
+    teams = get_teams_for_user(user_name)
     return flask.Response(json.dumps({"user_name": user_name, "teams": teams}), mimetype="application/json"), 200
 
 
@@ -237,7 +237,7 @@ def authorized():
 
     flask.session['auth_token'] = (resp['access_token'], '')
 
-    r = requests.get(TOKENINFO_URL, headers={'Authorization': 'Bearer ' + flask.session['auth_token']})
+    r = requests.get(TOKENINFO_URL, headers={'Authorization': 'Bearer ' + flask.session['auth_token'][0]})
     flask.session['user_name'] = r.json().get('uid')
 
     logger.info("Login from: {}".format(flask.session['user_name']))
