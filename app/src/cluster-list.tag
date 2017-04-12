@@ -2,7 +2,7 @@
   <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand">PGView Remote</a>
+            <a class="navbar-brand" href="#/clusters">PGView Remote</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
