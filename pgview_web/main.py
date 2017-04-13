@@ -157,12 +157,14 @@ def map_statefulset(cluster):
         "team": ""
     }
 
+
 def map_postgresql(cluster):
     return {
         "team": cluster["spec"]["teamId"],
         "name": cluster["metadata"]["name"],
         "nodes": cluster["spec"]["numberOfInstances"]
     }
+
 
 @app.route('/clusters')
 @authorize
@@ -181,11 +183,12 @@ def get_list_clusters():
 def map_member(member):
     return {
         "name": member["metadata"]["name"],
-        "labels": { "spilo-role": member["metadata"]["labels"].get("spilo-role","") },
+        "labels": {"spilo-role": member["metadata"]["labels"].get("spilo-role", "")},
         "creationTimestamp": member["metadata"]["creationTimestamp"],
         "status": member["status"],
         "nodeName": member["spec"]["nodeName"]
     }
+
 
 @app.route('/clusters/<cluster>')
 @authorize
