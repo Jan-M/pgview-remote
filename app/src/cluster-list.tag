@@ -85,8 +85,7 @@
   })
 
   this.on('update', () => {
-    console.log("update")
-    if(this.opts.clusters && this.teams ) {
+    if(this.opts.clusters && this.teams) {
       this.myClusters = this.opts.clusters.filter((x) => {        
         return this.teams.includes(x.team.toLowerCase())
       })

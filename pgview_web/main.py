@@ -197,7 +197,7 @@ def map_member(member):
 def get_list_members(cluster: str):
     pods = read_pods(get_cluster(), "default", cluster)
     pods = list(map(map_member, pods["items"]))
-    return flask.Response(json.dumps(pods), mimetype="application/json")
+    return flask.Response(json.dumps(pods), mimetype="application/json"), 200
 
 
 @app.route('/clusters/<cluster>/pod/<pod>')
