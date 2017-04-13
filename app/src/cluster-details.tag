@@ -1,6 +1,6 @@
 <cluster-details>
 <div if={ this.data }>
-    <div id="block-cpu">
+    <div id="block-cpu" style="float:left; width: 50%">
         <h3>CPU</h3>
         <div id="cpu">
             <table class="table">
@@ -27,6 +27,9 @@
             </table>
         </div>
     </div>
+    <div id="cpucharts" style="float:right; width:50%; height:150px;">
+
+    </div>
     <div id="block-memory">
         <h3>Memory</h3>
         <div id="memory">
@@ -43,13 +46,13 @@
                     </tr>
                 </thead>
                 <tr>
-                    <td>{ this.data.system_stats.memory.total }</td>
-                    <td>{ this.data.system_stats.memory.free }</td>
-                    <td>{ this.data.system_stats.memory.buffers }</td>
-                    <td>{ this.data.system_stats.memory.cached }</td>
-                    <td>{ this.data.system_stats.memory.commit_limit }</td>
-                    <td>{ this.data.system_stats.memory.committed_as }</td>
-                    <td>{ this.data.system_stats.memory.dirty }</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.total) }B</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.free) }B</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.buffers) }B</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.cached) }B</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.commit_limit) }B</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.committed_as) }B</td>
+                    <td>{ this.mFormat(this.data.system_stats.memory.dirty) }B</td>
                 </tr>
             </table>
         </div>
@@ -75,10 +78,10 @@
                 <td>{ value.device.io.await }</td>
                 <td>{ value.device.io.read }</td>
                 <td>{ value.device.io.write }</td>
-                <td>{ value.device.space.left }</td>
-                <td>{ value.device.space.total }</td>
+                <td>{ this.mFormat(value.device.space.left) }B</td>
+                <td>{ this.mFormat(value.device.space.total) }B</td>
                 <td>{ value.directory.name }</td>
-                <td>{ value.directory.size }</td>
+                <td>{ this.mFormat(value.directory.size) }B</td>
             </tr>
             </table>
         </div>
@@ -125,6 +128,10 @@
 </style>
 <script type="javascript">
 
+    this.mFormat = d3.format('.4s')
+
+    this.cpuLoad = []
+
     this.tick = () => {
 
         jQuery.get("/clusters/" + this.opts.cluster + "/pod/" + this.opts.pod,{}, (data) => { 
@@ -137,7 +144,9 @@
     this.tick()
 
     this.on('update', (data) => {
-
+        this.cpuLoad.push([(new Date()).getTime(), this.data.system_stats.load_average[0]])
+        this.cpuLoad.slice(60)
+        $.plot("#cpucharts", [ this.cpuLoad ], { grid: { borderWidth: 0 }, xaxis: {mode: "time"}, yaxis: { min: 0 } });        
     })
 
     this.on('unmount', () => {

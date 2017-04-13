@@ -200,13 +200,19 @@ def get_list_members(cluster: str):
     return flask.Response(json.dumps(pods), mimetype="application/json"), 200
 
 
+MOCK_BGMON_IP = os.getenv('MOCK_BGMON_IP', None)
+
+
 @app.route('/clusters/<cluster>/pod/<pod>')
 @authorize
 def get_pod_data(cluster: str, pod: str):
     logger.info("Getting pod data for: {}".format(pod))
     pod_data = read_pod(get_cluster(), "default", pod)
 
-    podIP = pod_data.get("status", {}).get("podIP", None)
+    if not MOCK_BGMON_IP:
+        podIP = pod_data.get("status", {}).get("podIP", None)
+    else:
+        podIP = MOCK_BGMON_IP
 
     if not podIP:
         return "", 500
