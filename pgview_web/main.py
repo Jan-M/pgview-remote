@@ -70,7 +70,7 @@ def verify_token(token):
 def authorize_api(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        if not 'Authorization' in hasattr(flask.request.headers):
+        if 'Authorization' not in hasattr(flask.request.headers):
             return {}, 401
 
         if not verify_token(flask.request.headers.get('Authorization')):
@@ -107,16 +107,17 @@ def favicon():
 @app.route('/css/<path:path>')
 @authorize
 def send_css(path):
-    return send_from_directory('static/', path), 200, {"cache-control":"no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0",
-                                                       "Pragma":"no-cache",
-                                                       "Expires":"-1"}
+    return send_from_directory('static/', path), 200, {"cache-control": "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0",
+                                                       "Pragma": "no-cache",
+                                                       "Expires": "-1"}
+
 
 @app.route('/js/<path:path>')
 @authorize
 def send_js(path):
-    return send_from_directory('static/build', path), 200, {"cache-control":"no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0",
-                                                            "Pragma":"no-cache",
-                                                            "Expires":"-1"}
+    return send_from_directory('static/build', path), 200, {"cache-control": "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0",
+                                                            "Pragma": "no-cache",
+                                                            "Expires": "-1"}
 
 
 def get_teams_for_user(user_name):
@@ -128,6 +129,7 @@ def get_teams_for_user(user_name):
     teams = list(map(lambda x: x['id_name'], teams)
     )
     return teams
+
 
 @app.route('/teams')
 @authorize
@@ -204,7 +206,7 @@ def get_pod_data(cluster: str, pod: str):
     logger.info("Getting pod data for: {}".format(pod))
     pod_data = read_pod(get_cluster(), "default", pod)
 
-    podIP = pod_data.get("status",{}).get("podIP", None)
+    podIP = pod_data.get("status", {}).get("podIP", None)
 
     if not podIP:
         return "", 500
@@ -280,9 +282,13 @@ class CommaSeparatedValues(click.ParamType):
             values = value
         return values
 
+
 CLUSTER = None
+
+
 def get_cluster():
     return CLUSTER
+
 
 def set_cluster(c):
     global CLUSTER
