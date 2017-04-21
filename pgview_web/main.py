@@ -126,8 +126,7 @@ def get_teams_for_user(user_name):
 
     r = requests.get(TEAM_SERVICE_URL.format(user_name), headers={'Authorization': 'Bearer ' + tokens.get('read-only')})
     teams = r.json()
-    teams = list(map(lambda x: x['id_name'], teams)
-    )
+    teams = list(map(lambda x: x['id_name'], teams))
     return teams
 
 
@@ -188,7 +187,7 @@ def map_member(member):
         "labels": {"spilo-role": member["metadata"]["labels"].get("spilo-role", "")},
         "creationTimestamp": member["metadata"]["creationTimestamp"],
         "status": member["status"],
-        "nodeName": member["spec"]["nodeName"]
+        "nodeName": member["spec"].get('nodeName', 'PROVISIONING')
     }
 
 
